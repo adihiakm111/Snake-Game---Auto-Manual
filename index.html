@@ -22,12 +22,15 @@
     </style>
 </head>
 <body>
-    <h2>Score: <span id="score">0</span></h2>
+    <h2>Score: <span id="score">0</span> | Top: <span id="highScore">0</span></h2>
+
     <canvas id="gameCanvas" width="400" height="400"></canvas>
     <div class="game-over" id="gameOverText">Game Over! Press Start.</div>
 
     <div class="controls">
         <button id="startButton" onclick="startGame()">Start Game (S)</button>
+        <button id="pauseButton" onclick="togglePause()">Pause (P)</button>
+
         <button id="autoButton" onclick="toggleAutoMove()">Auto Move (A)</button>
     </div>
     <div class="settings">
@@ -383,7 +386,79 @@ function getRandomPosition() {
     return pos;
 };
 
-        
+let highScore = localStorage.getItem("highScore") || 0;
+document.getElementById("highScore").textContent = highScore;
+
+function updateHighScore() {
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem("highScore", highScore);
+        document.getElementById("highScore").textContent = highScore;
+    }
+}
+
+function gameOver() {
+    clearInterval(gameInterval);
+    gameRunning = false;
+    gameOverSound.play();
+    updateHighScore(); // Game over hone par high score update karo
+
+    setTimeout(() => {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(gameOverImage, 50, 50, 300, 300);
+
+        ctx.fillStyle = "white";
+        ctx.font = "20px Arial";
+        ctx.fillText("Press 'S' to Restart", 120, 380);
+    }, 100);
+};
+function autoControl() {
+    let head = snake[0];
+
+    // Agar powerFood hai, toh uske taraf jao, nahi toh normal food ke taraf jao
+    let target = powerFood ? powerFood : food;
+
+    let moves = [
+        { x: head.x + 20, y: head.y, direction: "right" },
+        { x: head.x - 20, y: head.y, direction: "left" },
+        { x: head.x, y: head.y - 20, direction: "up" },
+        { x: head.x, y: head.y + 20, direction: "down" }
+    ];
+
+    moves = moves.filter(move => !isWall(move.x, move.y) && !isSnake(move.x, move.y));
+
+    moves.sort((a, b) => getDistance(a, target) - getDistance(b, target));
+
+    if (moves.length > 0) {
+        direction = moves[0].direction;
+    }
+};
+let isPaused = false; // Pause state
+
+function togglePause() {
+    if (gameRunning) {
+        isPaused = !isPaused;
+        if (isPaused) {
+            clearInterval(gameInterval);
+            document.getElementById("pauseButton").textContent = "Resume (P)";
+        } else {
+            gameInterval = setInterval(updateGame, gameSpeed);
+            document.getElementById("pauseButton").textContent = "Pause (P)";
+        }
+    }
+}
+
+document.addEventListener("keydown", (event) => {
+    if (event.key.toLowerCase() === "p") togglePause();
+});
+document.addEventListener("keydown", (event) => {
+    if (event.key === "p" || event.key === "P") {  // Check for 'P' key
+        if (gamePaused) resumeGame();  // Resume game
+        else pauseGame();  // Pause game
+    }
+});
+
     </script>
 </body>
 </html>
