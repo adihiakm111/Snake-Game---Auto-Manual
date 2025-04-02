@@ -458,7 +458,20 @@ document.addEventListener("keydown", (event) => {
         else pauseGame();  // Pause game
     }
 });
+let appleCount = 0; // Track number of apples eaten
 
+function checkAppleCollision() {
+    if (snake.x === apple.x && snake.y === apple.y) {
+        appleCount++;  // Increase apple count
+
+        // Every 3 apples, increase the snake's size
+        if (appleCount % 3 === 0) {
+            snake.length += 1;  // Increase snake size
+        }
+
+        spawnNewApple();  // Generate a new apple at a random position
+    }
+}
     </script>
 </body>
 </html>
