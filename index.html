@@ -66,7 +66,7 @@
             powerFood = null;
             score = 0;
             document.getElementById("score").textContent = score;
-            gameSpeed = 150;
+            gameSpeed = 200;
             clearInterval(gameInterval);
             gameInterval = setInterval(updateGame, gameSpeed);
         }
@@ -184,6 +184,7 @@
             else if (food.y > head.y) direction = "down";
             else if (food.y < head.y) direction = "up";
         }
+
         document.addEventListener("keydown", (event) => {
             if (event.key === "ArrowUp") changeDirection("up");
             if (event.key === "ArrowDown") changeDirection("down");
@@ -192,6 +193,7 @@
             if (event.key === "s" || event.key === "S") startGame();
             if (event.key === "a" || event.key === "A") toggleAutoMove();
         });
+        // Sound effects
 const eatSound = new Audio("eating-sound-effect-36186.mp3");
 const gameOverSound = new Audio("negative_beeps-6008.mp3");
 const winSound = new Audio("8-bit-victory-sound-101319.mp3");
@@ -210,9 +212,10 @@ function moveSnake() {
         score++;
         document.getElementById("score").textContent = score;
         increaseSpeed();
-        eatSound.play();
+        eatSound.play(); // Apple khane par sound play
+
         if (score % 10 === 0) {
-            winSound.play();
+            winSound.play(); // 10+ score hone par sound play
             powerFood = getRandomPosition();
         }
     } else if (powerFood && head.x === powerFood.x && head.y === powerFood.y) {
@@ -225,31 +228,39 @@ function moveSnake() {
         snake.pop();
     }
 }
+
 function gameOver() {
     clearInterval(gameInterval);
     gameRunning = false;
     document.getElementById("gameOverText").style.display = "block";
-    gameOverSound.play();
+    gameOverSound.play(); // Game over hone par sound play
 };
+// Game Over Image
 const gameOverImage = new Image();
 gameOverImage.src = "game-over-7952252_640.png";
+
 gameOverImage.onload = function() {
     console.log("Game over image loaded!");
 };
+
 function gameOver() {
     clearInterval(gameInterval);
     gameRunning = false;
     gameOverSound.play();
+
+    // Wait for a moment before drawing the image
     setTimeout(() => {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(gameOverImage, 50, 50, 300, 300);
+
+        // Restart text
         ctx.fillStyle = "white";
         ctx.font = "20px Arial";
         ctx.fillText("Press 'S' to Restart", 120, 380);
     }, 100);
 };
-let mod = "classic";
+let mod = "classic"; // Default mod
 
 function changeMod(selectedMod) {
     mod = selectedMod;
@@ -313,39 +324,57 @@ document.addEventListener("keydown", (event) => {
     if (event.key.toLowerCase() === "m") {
         modIndex = (modIndex + 1) % mods.length;
         mod = mods[modIndex];
-        console.log("Mode Changed:", mod);
+        console.log("Mode Changed:", mod); // Debugging ke liye
     }
 });
 function autoControl() {
     let head = snake[0];
     let nextMove = { x: head.x, y: head.y };
+
+    // Possible moves
     let moves = [
         { x: head.x + 20, y: head.y, direction: "right" },
         { x: head.x - 20, y: head.y, direction: "left" },
         { x: head.x, y: head.y - 20, direction: "up" },
         { x: head.x, y: head.y + 20, direction: "down" }
     ];
+
+    // Filter out moves that hit walls or self
     moves = moves.filter(move => !isWall(move.x, move.y) && !isSnake(move.x, move.y));
+
+    // Sort moves based on distance from food
     moves.sort((a, b) => getDistance(a, food) - getDistance(b, food));
+
+    // Choose best move
     if (moves.length > 0) {
         direction = moves[0].direction;
     }
 }
+
+// Check if position is a wall
 function isWall(x, y) {
     if (mod !== "maze") return false;
+
     let walls = [
         { x: 100, y: 100, width: 200, height: 20 },
         { x: 100, y: 200, width: 20, height: 200 },
         { x: 300, y: 200, width: 20, height: 200 }
     ];
+
     return walls.some(w => x >= w.x && x < w.x + w.width && y >= w.y && y < w.y + w.height);
 }
+
+// Check if position is part of snake body
 function isSnake(x, y) {
     return snake.some(segment => segment.x === x && segment.y === y);
 }
+
+// Calculate distance (Manhattan distance)
 function getDistance(a, b) {
     return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }
+
+// Fix Food Spawn in Maze Mode
 function getRandomPosition() {
     let pos;
     do {
@@ -353,9 +382,10 @@ function getRandomPosition() {
             x: Math.floor(Math.random() * 20) * 20,
             y: Math.floor(Math.random() * 20) * 20
         };
-    } while (isWall(pos.x, pos.y));
+    } while (isWall(pos.x, pos.y)); // Make sure food is not inside a wall
     return pos;
 };
+
 let highScore = localStorage.getItem("highScore") || 0;
 document.getElementById("highScore").textContent = highScore;
 
@@ -385,13 +415,17 @@ function gameOver() {
 };
 function autoControl() {
     let head = snake[0];
+
+    // Agar powerFood hai, toh uske taraf jao, nahi toh normal food ke taraf jao
     let target = powerFood ? powerFood : food;
+
     let moves = [
         { x: head.x + 20, y: head.y, direction: "right" },
         { x: head.x - 20, y: head.y, direction: "left" },
         { x: head.x, y: head.y - 20, direction: "up" },
         { x: head.x, y: head.y + 20, direction: "down" }
     ];
+
     moves = moves.filter(move => !isWall(move.x, move.y) && !isSnake(move.x, move.y));
 
     moves.sort((a, b) => getDistance(a, target) - getDistance(b, target));
@@ -400,7 +434,8 @@ function autoControl() {
         direction = moves[0].direction;
     }
 };
-let isPaused = false; 
+let isPaused = false; // Pause state
+
 function togglePause() {
     if (gameRunning) {
         isPaused = !isPaused;
@@ -418,44 +453,13 @@ document.addEventListener("keydown", (event) => {
     if (event.key.toLowerCase() === "p") togglePause();
 });
 document.addEventListener("keydown", (event) => {
-    if (event.key === "p" || event.key === "P") {  
-        if (gamePaused) resumeGame();
-        else pauseGame();  
+    if (event.key === "p" || event.key === "P") {  // Check for 'P' key
+        if (gamePaused) resumeGame();  // Resume game
+        else pauseGame();  // Pause game
     }
 });
-function moveSnake() {
-    let head = { ...snake[0] };
-    if (direction === "up") head.y -= 20;
-    if (direction === "down") head.y += 20;
-    if (direction === "left") head.x -= 20;
-    if (direction === "right") head.x += 20;
-    head.color = getRandomColor();
-    snake.unshift(head);
 
-    if (head.x === food.x && head.y === food.y) {
-        food = getRandomPosition();
-        score++;
-        document.getElementById("score").textContent = score;
-        increaseSpeed();
-        eatSound.play();
-        if (score % 10 === 0) {
-            winSound.play();
-            powerFood = getRandomPosition();
-        }
-        if (score % 3 !== 0) {
-            snake.pop();
-        }
-    } else if (powerFood && head.x === powerFood.x && head.y === powerFood.y) {
-        powerFood = null;
-        score += 10;
-        document.getElementById("score").textContent = score;
-        increaseSpeed();
-        eatSound.play();
-        snake.pop();
-    } else {
-        snake.pop();
-    }
-}
-          </script>
+    </script>
 </body>
 </html>
+
