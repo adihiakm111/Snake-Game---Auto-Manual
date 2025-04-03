@@ -40,6 +40,15 @@
             <option value="wall">Wall</option>
             <option value="maze">Maze</option>
         </select>
+        <label for="speedControl">Game Speed:</label>
+<select id="speedControl" onchange="changeGameSpeed()">
+    <option value="1">1x</option>
+    <option value="2">2x</option>
+    <option value="3">3x</option>
+    <option value="4">4x</option>
+    <option value="5">5x</option>
+</select>
+
     </div>
     
 
@@ -458,6 +467,19 @@ document.addEventListener("keydown", (event) => {
         else pauseGame();  // Pause game
     }
 });
+function changeGameSpeed() {
+    let speedMultiplier = document.getElementById("speedControl").value;
+    
+    // Base speed (jitni tumhari default speed hai)
+    let baseSpeed = 200; 
+    
+    // New speed calculate karo (baseSpeed ko divide karke)
+    gameSpeed = baseSpeed / speedMultiplier; 
+    
+    // Speed apply karo
+    clearInterval(gameInterval);
+    gameInterval = setInterval(updateGame, gameSpeed);
+}
 
     </script>
 </body>
