@@ -444,7 +444,7 @@ function autoControl() {
         direction = moves[0].direction;
     }
 };
-let isPaused = false;
+let isPaused = false; // Pause state
 
 function togglePause() {
     if (gameRunning) {
@@ -471,28 +471,39 @@ document.addEventListener("keydown", (event) => {
 function changeGameSpeed() {
     let speedMultiplier = document.getElementById("speedControl").value;
     
-
-    let baseSpeed = 100; 
+    // Base speed (jitni tumhari default speed hai)
+    let baseSpeed = 200; 
+    
+    // New speed calculate karo (baseSpeed ko divide karke)
     gameSpeed = baseSpeed / speedMultiplier; 
     
     // Speed apply karo
     clearInterval(gameInterval);
     gameInterval = setInterval(updateGame, gameSpeed);
 };
-let appleCounter = 0; 
+let appleCounter = 0; // Apple count track karega
+
+function moveSnake() {
+    let head = {...snake[0]};
+    if (direction === "up") head.y -= 20;
+    if (direction === "down") head.y += 20;
+    if (direction === "left") head.x -= 20;
+    if (direction === "right") head.x += 20;
+    head.color = getRandomColor();
+    snake.unshift(head);
 
     if (head.x === food.x && head.y === food.y) {
         food = getRandomPosition();
         score++;
-        appleCounter++;
+        appleCounter++; // Apple counter badhao
         document.getElementById("score").textContent = score;
         increaseSpeed();
         eatSound.play();
 
         if (appleCounter >= 3) {
-            appleCounter = 0;
+            appleCounter = 0; // Reset counter
         } else {
-            snake.pop();
+            snake.pop(); // Normal apple pe body nahi badhegi
         }
 
         if (score % 10 === 0) {
